@@ -1,5 +1,17 @@
-function trainHuffmanTables
-    clearvars
+%% Huffman table training for I frames
+% 
+% This function generates the Huffman table necessaries for a video coder
+% for intra prediction using the motion sequences:
+%
+% "akiyo"
+% "coastguard"
+% "foreman"
+% "news"
+% "silent"
+%
+
+function[ BinaryTree, HuffCode, BinCode, Codelengths] = trainIntraHuffmanTable
+    start_time = cputime;
     directory_path = 'data/images/';
     file_extension = '.bmp';
     file_00 = 'akiyo';
@@ -9,14 +21,19 @@ function trainHuffmanTables
     file_04 = 'silent';
     intra_accumulated_sum = 0;
     intra_accumulated_pdf = 0;
-    mv_accumulated_sum = 0;
-    mv_accumulated_pdf = 0;
-    error_accumulated_sum = 0;
-    error_accumulated_pdf = 0;
+    start_of_sequence = 20;
+    end_of_sequence = 40;
+    
+    %% 
+    % Read all the frames, calculate their histogram and accumulate the
+    % calculate all the histograms while simultaneously generating a
+    % summation of histogram bin values accross all the frames. Finally
+    % produce the global pdf and generate the Huffman table.
+    %
     for i = 0:4
         switch i
             case 0
-                for j = 20 : 40
+                for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_00 image_index file_extension];
                     [summation , pdf] = readAndGenerateHistogram(file_path);
@@ -24,7 +41,7 @@ function trainHuffmanTables
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
             case 1
-                for j = 20 : 40
+                for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_01 image_index file_extension];
                     [summation , pdf] = readAndGenerateHistogram(file_path);
@@ -32,7 +49,7 @@ function trainHuffmanTables
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
             case 2
-                for j = 20 : 40
+                for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_02 image_index file_extension];
                     [summation , pdf] = readAndGenerateHistogram(file_path);
@@ -40,7 +57,7 @@ function trainHuffmanTables
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
             case 3
-                for j = 20 : 40
+                for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_03 image_index file_extension];
                     [summation , pdf] = readAndGenerateHistogram(file_path);
@@ -48,7 +65,7 @@ function trainHuffmanTables
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
             case 4
-                for j = 20 : 40
+                for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_04 image_index file_extension];
                     [summation , pdf] = readAndGenerateHistogram(file_path);
@@ -59,10 +76,10 @@ function trainHuffmanTables
     end
     histogram = intra_accumulated_pdf / intra_accumulated_sum;
     [ BinaryTree, HuffCode, BinCode, Codelengths] = buildHuffman(histogram);
-    function [summation , pdf] =  readAndGenerateHistogram(file_path)
-        frame = double(imread(file_path));
-        frame = ictRGB2YCbCr(frame);
-        pdf = hist(frame,-128:255);
-        summation = sum(pdf);
-    end
+    save('video_codec/huffman_tables/intra_binary_tree.mat', 'BinaryTree');
+    save('video_codec/huffman_tables/intra_huff_code.mat', 'HuffCode');
+    save('video_codec/huffman_tables/intra_bin_code.mat', 'BinCode');
+    save('video_codec/huffman_tables/intra_codelengths.mat', 'Codelengths');
+    end_time = cputime - start_time;
+    fprintf('Intra Huffman table training execution time equals: %d seconds.\n',end_time);
 end

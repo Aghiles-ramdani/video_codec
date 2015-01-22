@@ -1,4 +1,4 @@
-function [new_final_array] = preEncodeProcess( stream, Q)
+function [new_final_array] = preEncodeIntraProcess(stream, Q)
     sizes = size ( stream );
     final_arrayY = [ 0 ];
     final_arrayCb = [ 0 ];
