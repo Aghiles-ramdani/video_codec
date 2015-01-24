@@ -100,16 +100,16 @@ function[ mv_BinaryTree, mv_HuffCode, mv_BinCode, mv_Codelengths, ef_BinaryTree,
     end
     mv_histogram = intra_accummulated_mv_histogram / intra_accummulated_mv_sum;
     [ mv_BinaryTree, mv_HuffCode, mv_BinCode, mv_Codelengths] = buildHuffman(mv_histogram);
-    save('video_codec/huffman_tables/inter_binary_tree.mat', 'mv_BinaryTree');
-    save('video_codec/huffman_tables/inter_huff_code.mat', 'mv_HuffCode');
-    save('video_codec/huffman_tables/inter_bin_code.mat', 'mv_BinCode');
-    save('video_codec/huffman_tables/inter_codelengths.mat', 'mv_Codelengths');
+    save('video_codec/huffman_tables/inter_binary_tree_mv.mat', 'mv_BinaryTree');
+    save('video_codec/huffman_tables/inter_huff_code_mv.mat', 'mv_HuffCode');
+    save('video_codec/huffman_tables/inter_bin_code_mv.mat', 'mv_BinCode');
+    save('video_codec/huffman_tables/inter_codelengths_mv.mat', 'mv_Codelengths');
     ef_histogram = intra_accummulated_ef_histogram / intra_accummulated_ef_sum;
     [ ef_BinaryTree, ef_HuffCode, ef_BinCode, ef_Codelengths] = buildHuffman(ef_histogram);
-    save('video_codec/huffman_tables/inter_binary_tree.mat', 'ef_BinaryTree');
-    save('video_codec/huffman_tables/inter_huff_code.mat', 'ef_HuffCode');
-    save('video_codec/huffman_tables/inter_bin_code.mat', 'ef_BinCode');
-    save('video_codec/huffman_tables/inter_codelengths.mat', 'ef_Codelengths');
+    save('video_codec/huffman_tables/inter_binary_tree_ef.mat', 'ef_BinaryTree');
+    save('video_codec/huffman_tables/inter_huff_code_ef.mat', 'ef_HuffCode');
+    save('video_codec/huffman_tables/inter_bin_code_ef.mat', 'ef_BinCode');
+    save('video_codec/huffman_tables/inter_codelengths_ef.mat', 'ef_Codelengths');
     end_time = cputime - start_time;
     fprintf('Inter Huffman table training execution time equals: %d seconds.\n',end_time);
 end
