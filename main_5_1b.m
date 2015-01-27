@@ -4,7 +4,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%% VARIABLE DECLARATION %%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Q = 3;
+Q = 5;
 ycbcr_lowerbound = -128;
 er_lowerbound = -255;
 upperbound = 260;
@@ -63,7 +63,6 @@ ycbcr_reference_frame = ictRGB2YCbCr(reference_frame);
 psnrs(1) = calculatePSNR(8,(reference_frame),ictYCbCr2RGB(decoded_ycbcr_frame));
 bitrates(1) = calculateBitrate(frames{1},intra_encoded_frame);
 
-ycbcr_filtered_frame = zeros(dimensions);
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% INTER ENCODING %%%%%%%%%%
@@ -77,7 +76,7 @@ for i = 1:20
     clear ycbcr_predicted_frame
     [ycbcr_predicted_frame,motion_matrix]=InterEncodeFrame(macroblock_dim,mv_search_range,ycbcr_current_frame,ycbcr_reference_frame);
     %% ERROR CALCULATION
-    ycbcr_prediction_error_frame = ycbcr_current_frame - ycbcr_predicted_frame;
+    ycbcr_prediction_error_frame=ycbcr_current_frame-ycbcr_predicted_frame;
     %% HUFFMAN TABLES TRAINING
     if(i == 1)
         [BinaryTree_mv,BinCode_mv,Codelengths_mv] = ProduceHuffmanTable(motion_matrix,mv_lowerbound,mv_upperbound);
@@ -102,11 +101,11 @@ for i = 1:20
     
     clear ycbcr_predicted_frame
     ycbcr_predicted_frame = motionCompensation(ycbcr_reference_frame,reshaped_mv,macroblock_dim);
+    ycbcr_filtered_frame = ycbcr_predicted_frame;
     %% -------------------- DEBLOCKING FILTERING --------------------------
     for row = 1 : macroblock_dim : dimensions(1)
         for column = 1 : macroblock_dim : dimensions(2)
-            % For any non-corner block
-            if(row > 1 && row < height_-8 && column > 1 && column < length_-8)
+            if row < height_ - 8 && column < length_ - 8
                 block = ycbcr_predicted_frame(row:row+3*macroblock_dim/2,column:column+3*macroblock_dim/2,1:3);
                 filtered_block = block;
                 %--------------------- HORIZONTAL EDGE --------------------
@@ -141,13 +140,52 @@ for i = 1:20
                     filtered_block(r,c_col,:) = C_new;
                     filtered_block(r,d_col,:) = D_new;
                 end
-                ycbcr_filtered_frame(row:row+3*macroblock_dim/2-1,column:column+macroblock_dim-1,1:3) = filtered_block(1:3*macroblock_dim/2,1:macroblock_dim,1:3);
-                ycbcr_filtered_frame(row:row+macroblock_dim-1,column:column+3*macroblock_dim/2-1,1:3) = filtered_block(1:macroblock_dim,1:3*macroblock_dim/2,1:3);
-            else
-                
+                ycbcr_filtered_frame(row+macroblock_dim-2:row+3*macroblock_dim/2-1-2,column:column+macroblock_dim-1,1:3) = filtered_block(1+macroblock_dim-2:3*macroblock_dim/2-2,1:macroblock_dim,1:3);
+                ycbcr_filtered_frame(row:row+macroblock_dim-1,column+macroblock_dim-2:column+3*macroblock_dim/2-1-2,1:3) = filtered_block(1:macroblock_dim,1+macroblock_dim-2:3*macroblock_dim/2-2,1:3);
+            elseif column == length_-8+1 && row ~= height_-8+1
+                block = ycbcr_predicted_frame(row:row+3*macroblock_dim/2,column:column+macroblock_dim-1,1:3);
+                filtered_block = block;
+                %--------------------- HORIZONTAL EDGE --------------------
+                for c = 1 : macroblock_dim
+                    a_row = 7;
+                    b_row = 8;
+                    c_row = 9;
+                    d_row = 10;
+                    A = block(a_row:a_row+3,c,:);
+                    B = block(b_row:b_row+3,c,:);
+                    C = block(c_row:b_row+3,c,:);
+                    D = block(d_row:d_row+3,c,:);
+                    [A_new,B_new,C_new,D_new] = smoothEdge(A,B,C,D);
+                    filtered_block(a_row,c,:) = A_new;
+                    filtered_block(b_row,c,:) = B_new;
+                    filtered_block(c_row,c,:) = C_new;
+                    filtered_block(d_row,c,:) = D_new;
+                end
+                ycbcr_filtered_frame(row+macroblock_dim-2:row+3*macroblock_dim/2-1-2,column:column+macroblock_dim-1,1:3) = filtered_block(1+macroblock_dim-2:3*macroblock_dim/2-2,1:macroblock_dim,1:3);
+            elseif column ~= length_-8+1 && row == height_-8+1
+                block = ycbcr_predicted_frame(row:row+macroblock_dim-1,column:column+3*macroblock_dim/2,1:3);
+                filtered_block = block;
+                %--------------------- VERTICAL EDGE ----------------------
+                for r = 1 : macroblock_dim
+                    a_col = 7;
+                    b_col = 8;
+                    c_col = 9;
+                    d_col = 10;
+                    A = filtered_block(r,a_col:a_col+3,:);
+                    B = filtered_block(r,b_col:b_col+3,:);
+                    C = filtered_block(r,c_col:c_col+3,:);
+                    D = filtered_block(r,d_col:d_col+3,:);
+                    [A_new,B_new,C_new,D_new] = smoothEdge(A,B,C,D);
+                    filtered_block(r,a_col,:) = A_new;
+                    filtered_block(r,b_col,:) = B_new;
+                    filtered_block(r,c_col,:) = C_new;
+                    filtered_block(r,d_col,:) = D_new;
+                end
+                ycbcr_filtered_frame(row:row+macroblock_dim-1,column+macroblock_dim-2:column+3*macroblock_dim/2-1-2,1:3) = filtered_block(1:macroblock_dim,1+macroblock_dim-2:3*macroblock_dim/2-2,1:3);
             end
         end
     end
+    
     %
     
     ycbcr_recovered_frame = ycbcr_predicted_frame + ycbcr_decoded_error_frame;
