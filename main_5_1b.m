@@ -4,7 +4,7 @@ clearvars
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%% VARIABLE DECLARATION %%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Q = 1;
+Q = 3;
 ycbcr_lowerbound = -128;
 er_lowerbound = -255;
 upperbound = 260;
@@ -62,6 +62,8 @@ ycbcr_reference_frame = ictRGB2YCbCr(reference_frame);
 [decoded_ycbcr_frame,intra_encoded_frame] = IntraEncodeFrame(ycbcr_reference_frame,intra_BinaryTree, intra_BinCode, intra_Codelengths, Q,ycbcr_lowerbound);
 psnrs(1) = calculatePSNR(8,(reference_frame),ictYCbCr2RGB(decoded_ycbcr_frame));
 bitrates(1) = calculateBitrate(frames{1},intra_encoded_frame);
+
+ycbcr_filtered_frame = zeros(dimensions);
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% INTER ENCODING %%%%%%%%%%
@@ -100,40 +102,55 @@ for i = 1:20
     
     clear ycbcr_predicted_frame
     ycbcr_predicted_frame = motionCompensation(ycbcr_reference_frame,reshaped_mv,macroblock_dim);
-    ycbcr_recovered_frame = ycbcr_predicted_frame + ycbcr_decoded_error_frame;
     %% -------------------- DEBLOCKING FILTERING --------------------------
-    ycbcr_filtered_frame = zeros(dimensions);
     for row = 1 : macroblock_dim : dimensions(1)
         for column = 1 : macroblock_dim : dimensions(2)
-            block = ycbcr_recovered_frame(row : row + macroblock_dim - 1, column : column + macroblock_dim - 1, 1:3);
-            filtered_block = block;
             % For any non-corner block
-            if(row > 1 && row < height_ && column > 1 && column < length_)
-                for c = column : column + macroblock_dim - 1
-                    A_top = block(row - 2,column,:);
-                    B_top = block(row - 1,column,:);
-                    C_top = block(row,column,:);
-                    D_top = block(row + 1,column,:);
-                    % [A,B,C,D] = smoothEdge(A_top,B_top,C_top,D_top);
-                    % filtered_block(row - 2,column,:) = A;
-                    % filtered_block(row - 1,column,:) = B;
-                    % filtered_block(row,column,:) = C;
-                    % filtered_block(row + 1,column,:) = D;
-                    bot_row = row + macroblock_dim - 1;
-                    A_bot= block(bot_row - 1,column,:);
-                    B_bot = block(bot_row,column,:);
-                    C_bot = block(bot_row + 1,column,:);
-                    D_bot = block(bot_row + 2,column,:);
-                    % [A,B,C,D] = smoothEdge(A_bot,B_bot,C_bot,D_bot);
-                    % filtered_block(bot_row - 1,column,:) = A;
-                    % filtered_block(bot_row,column,:) = B;
-                    % filtered_block(bot_row + 1,column,:) = C;
-                    % filtered_block(bot_row + 2,column,:) = D;
+            if(row > 1 && row < height_-8 && column > 1 && column < length_-8)
+                block = ycbcr_predicted_frame(row:row+3*macroblock_dim/2,column:column+3*macroblock_dim/2,1:3);
+                filtered_block = block;
+                %--------------------- HORIZONTAL EDGE --------------------
+                for c = 1 : macroblock_dim
+                    a_row = 7;
+                    b_row = 8;
+                    c_row = 9;
+                    d_row = 10;
+                    A = block(a_row:a_row+3,c,:);
+                    B = block(b_row:b_row+3,c,:);
+                    C = block(c_row:b_row+3,c,:);
+                    D = block(d_row:d_row+3,c,:);
+                    [A_new,B_new,C_new,D_new] = smoothEdge(A,B,C,D);
+                    filtered_block(a_row,c,:) = A_new;
+                    filtered_block(b_row,c,:) = B_new;
+                    filtered_block(c_row,c,:) = C_new;
+                    filtered_block(d_row,c,:) = D_new;
                 end
+                %--------------------- VERTICAL EDGE ----------------------
+                for r = 1 : macroblock_dim
+                    a_col = 7;
+                    b_col = 8;
+                    c_col = 9;
+                    d_col = 10;
+                    A = filtered_block(r,a_col:a_col+3,:);
+                    B = filtered_block(r,b_col:b_col+3,:);
+                    C = filtered_block(r,c_col:c_col+3,:);
+                    D = filtered_block(r,d_col:d_col+3,:);
+                    [A_new,B_new,C_new,D_new] = smoothEdge(A,B,C,D);
+                    filtered_block(r,a_col,:) = A_new;
+                    filtered_block(r,b_col,:) = B_new;
+                    filtered_block(r,c_col,:) = C_new;
+                    filtered_block(r,d_col,:) = D_new;
+                end
+                ycbcr_filtered_frame(row:row+3*macroblock_dim/2-1,column:column+macroblock_dim-1,1:3) = filtered_block(1:3*macroblock_dim/2,1:macroblock_dim,1:3);
+                ycbcr_filtered_frame(row:row+macroblock_dim-1,column:column+3*macroblock_dim/2-1,1:3) = filtered_block(1:macroblock_dim,1:3*macroblock_dim/2,1:3);
+            else
+                
             end
-            %
         end
     end
+    %
+    
+    ycbcr_recovered_frame = ycbcr_predicted_frame + ycbcr_decoded_error_frame;
     
     psnrs(i + 1) = calculatePSNR(8,current_frame,ictYCbCr2RGB(ycbcr_recovered_frame));
     bitrates(i + 1) = calculateBitrate(current_frame,[huffman_mv ; huffman_error_stream]);
