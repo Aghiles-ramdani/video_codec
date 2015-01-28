@@ -23,7 +23,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
     intra_accumulated_pdf = 0;
     start_of_sequence = 20;
     end_of_sequence = 40;
-    
+    Q = 1;
     %% 
     % Read all the frames, calculate their histogram and accumulate the
     % calculate all the histograms while simultaneously generating a
@@ -36,7 +36,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
                 for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_00 image_index file_extension];
-                    [summation , pdf] = intraCodingStatistics(file_path);
+                    [summation , pdf] = intraCodingStatistics(file_path,Q);
                     intra_accumulated_sum = intra_accumulated_sum + summation;
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
@@ -44,7 +44,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
                 for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_01 image_index file_extension];
-                    [summation , pdf] = intraCodingStatistics(file_path);
+                    [summation , pdf] = intraCodingStatistics(file_path,Q);
                     intra_accumulated_sum = intra_accumulated_sum + summation;
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
@@ -52,7 +52,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
                 for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_02 image_index file_extension];
-                    [summation , pdf] = intraCodingStatistics(file_path);
+                    [summation , pdf] = intraCodingStatistics(file_path,Q);
                     intra_accumulated_sum = intra_accumulated_sum + summation;
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
@@ -60,7 +60,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
                 for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_03 image_index file_extension];
-                    [summation , pdf] = intraCodingStatistics(file_path);
+                    [summation , pdf] = intraCodingStatistics(file_path,Q);
                     intra_accumulated_sum = intra_accumulated_sum + summation;
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
@@ -68,7 +68,7 @@ function[intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelength
                 for j = start_of_sequence : end_of_sequence
                     image_index = num2str(j,'%04d');
                     file_path = [directory_path file_04 image_index file_extension];
-                    [summation , pdf] = intraCodingStatistics(file_path);
+                    [summation , pdf] = intraCodingStatistics(file_path,Q);
                     intra_accumulated_sum = intra_accumulated_sum + summation;
                     intra_accumulated_pdf = intra_accumulated_pdf + pdf;
                 end
