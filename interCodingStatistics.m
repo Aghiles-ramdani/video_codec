@@ -24,8 +24,8 @@
 %--------------------------------------------------------------------------
 
 function [intra_mv_histogram , intra_mv_histogram_sum, intra_ef_histogram,intra_ef_histogram_sum] =  interCodingStatistics(macroblock_dim,Q,mv_search_range,frame_01,frame_00)
-    ef_lowerbound = -128;
-    ef_upperbound = 255 - (-128);
+    ef_lowerbound = -255;
+    ef_upperbound = 260;
     [ycbcr_predicted_frame,motion_matrix]=InterEncodeFrame(macroblock_dim,mv_search_range,frame_01,frame_00);
     ycbcr_prediction_error_frame = frame_01 - ycbcr_predicted_frame;
     ycbcr_intra_encoded_error_frame = preEncodeIntraProcess(ycbcr_prediction_error_frame,Q);
