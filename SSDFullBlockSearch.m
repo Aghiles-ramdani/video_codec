@@ -1,4 +1,4 @@
-function [motionVector] = SSDFullBlockSearch(x,y,block_size,mv_search_range,current_image,previous_image)
+function [motionVector, SSD] = SSDFullBlockSearch(x,y,block_size,mv_search_range,current_image,previous_image)
     sizes = size(current_image);
     length = sizes(1);
     height = sizes(2);
