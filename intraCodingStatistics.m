@@ -14,9 +14,10 @@
 %
 %--------------------------------------------------------------------------
 
-function [summation , histogram] =  intraCodingStatistics(file_path)
+function [summation , histogram] =  intraCodingStatistics(file_path,Q)
     frame = double(imread(file_path));
-    frame = ictRGB2YCbCr(frame);
-    histogram = hist(frame,-128:255);
+    ycbcr_frame = ictRGB2YCbCr(frame);
+    [new_final_array] = preEncodeIntraProcess(ycbcr_frame, Q);
+    histogram = hist(new_final_array,-128:260);
     summation = sum(histogram);
 end
