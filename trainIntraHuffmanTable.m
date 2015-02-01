@@ -75,13 +75,13 @@ function [] = trainIntraHuffmanTable(Q)
     end
     histogram = intra_accumulated_pdf / intra_accumulated_sum;
     [intra_binary_tree, intra_huffman_code, intra_bin_code, intra_codelengths] = buildHuffman(histogram);
-    bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00.mat',46,Q);
+    bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00.mat',46,Q,false);
     save(bt_path, 'intra_binary_tree');
-    hc_path = addQ2Path('video_codec/huffman_tables/intra_huff_code_00.mat',44,Q);
+    hc_path = addQ2Path('video_codec/huffman_tables/intra_huff_code_00.mat',44,Q,false);
     save(hc_path, 'intra_huffman_code');
-    bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00.mat',43,Q);
+    bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00.mat',43,Q,false);
     save(bc_path, 'intra_bin_code');
-    cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00.mat',46,Q);
+    cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00.mat',46,Q,false);
     save(cl_path, 'intra_codelengths');
     end_time = cputime - start_time;
     fprintf('Intra Huffman table training execution time equals: %d seconds.\n',end_time);

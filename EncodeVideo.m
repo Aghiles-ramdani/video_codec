@@ -1,4 +1,4 @@
-function[] = EncodeVideo(Q,GOP_enabled)
+function[] = EncodeVideo(Q,GOP_enabled,DEMV_enabled)
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%% VARIABLE DECLARATION %%%%%%%%%%%%
@@ -13,6 +13,10 @@ function[] = EncodeVideo(Q,GOP_enabled)
     sequence_length = length(gop);
     progress_marker = '=====';
     progress_bar = '';
+    DEMV_coeff = 1;
+    if DEMV_enabled
+        DEMV_coeff = 2;
+    end
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%% LOADING FRAMES %%%%%%%%%%%%%%%
@@ -79,57 +83,57 @@ function[] = EncodeVideo(Q,GOP_enabled)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%% INTRA HUFFMAN LOAD %%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00',46,Q);
+    bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00',46,Q,false);
     intra_binary_tree = load(bt_path,'-mat');
     intra_binary_tree = intra_binary_tree.intra_binary_tree;
-    bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00',43,Q);
+    bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00',43,Q,false);
     intra_bin_code = load(bc_path,'-mat');
     intra_bin_code = intra_bin_code.intra_bin_code;
-    cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00',46,Q);
+    cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00',46,Q,false);
     intra_codelengths = load(cl_path,'-mat');
     intra_codelengths = intra_codelengths.intra_codelengths;
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%% INTER HUFFMAN LOAD %%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_ef_00',49,Q);
-    inter_binary_tree_ef = load(bt_path,'-mat');
-    inter_binary_tree_ef = inter_binary_tree_ef.inter_binary_tree_ef;
-    bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_ef_00',46,Q);
-    inter_bin_code_ef = load(bc_path,'-mat');
-    inter_bin_code_ef = inter_bin_code_ef.inter_bin_code_ef;
-    cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_ef_00',49,Q);
-    inter_codelengths_ef = load(cl_path,'-mat');
-    inter_codelengths_ef = inter_codelengths_ef.inter_codelengths_ef;
-    bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_mv_00',49,Q);
+    bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_mv_00',49,Q,DEMV_enabled);
     inter_binary_tree_mv = load(bt_path,'-mat');
     inter_binary_tree_mv = inter_binary_tree_mv.inter_binary_tree_mv;
-    bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_mv_00',46,Q);
+    bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_mv_00',46,Q,DEMV_enabled);
     inter_bin_code_mv = load(bc_path,'-mat');
     inter_bin_code_mv = inter_bin_code_mv.inter_bin_code_mv;
-    cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_mv_00',49,Q);
+    cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_mv_00',49,Q,DEMV_enabled);
     inter_codelengths_mv = load(cl_path,'-mat');
     inter_codelengths_mv = inter_codelengths_mv.inter_codelengths_mv;
+    bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_ef_00',49,Q,false);
+    inter_binary_tree_ef = load(bt_path,'-mat');
+    inter_binary_tree_ef = inter_binary_tree_ef.inter_binary_tree_ef;
+    bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_ef_00',46,Q,false);
+    inter_bin_code_ef = load(bc_path,'-mat');
+    inter_bin_code_ef = inter_bin_code_ef.inter_bin_code_ef;
+    cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_ef_00',49,Q,false);
+    inter_codelengths_ef = load(cl_path,'-mat');
+    inter_codelengths_ef = inter_codelengths_ef.inter_codelengths_ef;
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%% BINTER HUFFMAN LOAD %%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_mv_00',51,Q);
+    bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_mv_00',51,Q,DEMV_enabled);
     inter_b_binary_tree_mv = load(bt_path,'-mat');
     inter_b_binary_tree_mv = inter_b_binary_tree_mv.inter_b_binary_tree_mv;
-    bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_mv_00',48,Q);
+    bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_mv_00',48,Q,DEMV_enabled);
     inter_b_bin_code_mv = load(bc_path,'-mat');
     inter_b_bin_code_mv = inter_b_bin_code_mv.inter_b_bin_code_mv;
-    cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_mv_00',51,Q);
+    cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_mv_00',51,Q,DEMV_enabled);
     inter_b_codelengths_mv = load(cl_path,'-mat');
     inter_b_codelengths_mv = inter_b_codelengths_mv.inter_b_codelengths_mv;
-    bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_ef_00',51,Q);
+    bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_ef_00',51,Q,false);
     inter_b_binary_tree_ef = load(bt_path,'-mat');
     inter_b_binary_tree_ef = inter_b_binary_tree_ef.inter_b_binary_tree_ef;
-    bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_ef_00',48,Q);
+    bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_ef_00',48,Q,false);
     inter_b_bin_code_ef = load(bc_path,'-mat');
     inter_b_bin_code_ef = inter_b_bin_code_ef.inter_b_bin_code_ef;
-    cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_ef_00',51,Q);
+    cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_ef_00',51,Q,false);
     inter_b_codelengths_ef = load(cl_path,'-mat');
     inter_b_codelengths_ef = inter_b_codelengths_ef.inter_b_codelengths_ef;
 
@@ -150,8 +154,7 @@ function[] = EncodeVideo(Q,GOP_enabled)
             bitrates(1) = calculateBitrate(current_frame,intra_encoded_frame);
             ycbcr_reference_frame_0 = ycbcr_decoded_frame;
         elseif tags{i} == 'P'
-            %% P FRAMES
-            %% MOTION ESTIMATION
+            %% P FRAMES MOTION ESTIMATION
             [ycbcr_predicted_frame,motion_matrix]=InterEncodeFrame(macroblock_dim,mv_search_range,ycbcr_current_frame,ycbcr_reference_frame_0);
 
             %% ERROR CALCULATION
@@ -161,25 +164,30 @@ function[] = EncodeVideo(Q,GOP_enabled)
             [ycbcr_decoded_error_frame,huffman_error_stream]=IntraEncodeFrame(ycbcr_prediction_error_frame,inter_binary_tree_ef,inter_bin_code_ef,inter_codelengths_ef,Q,ef_lowerbound);
 
             %% HUFFMAN CODING OF MV
-            [huffman_mv]=enc_huffman_new(motion_matrix+mv_search_range+1,inter_bin_code_mv,inter_codelengths_mv);
+            if DEMV_enabled
+                motion_matrix = EncodeMMDifferentially(motion_matrix);
+            end
+            [huffman_mv]=enc_huffman_new(motion_matrix+DEMV_coeff*mv_search_range+1,inter_bin_code_mv,inter_codelengths_mv);
 
-            %% DECODING
-            decoded_mv=dec_huffman_new(huffman_mv,inter_binary_tree_mv,max(size(motion_matrix(:))))-4-1;
+            %% HUFFMAN DECODING OF MV
+            decoded_mv=dec_huffman_new(huffman_mv,inter_binary_tree_mv,max(size(motion_matrix(:))))-DEMV_coeff*mv_search_range-1;
             new_decoded_image_mv_00=decoded_mv(1:36*44);
             new_decoded_image_mv_01=decoded_mv(36*44+1:2*36*44);
             reshaped_mv(:,:,1)=reshape(new_decoded_image_mv_00,36,44);
             reshaped_mv(:,:,2)=reshape(new_decoded_image_mv_01,36,44);
-
+            if DEMV_enabled
+                reshaped_mv = DecodeMMDifferentially(reshaped_mv);
+            end
             %% MOTION COMPENSATION
             ycbcr_predicted_frame = motionCompensation(ycbcr_reference_frame_0,reshaped_mv,macroblock_dim);
-
             ycbcr_recovered_frame = ycbcr_predicted_frame + ycbcr_decoded_error_frame;
 
+            %% PERFORMANCE ANALYSIS
             psnrs(i) = calculatePSNR(8,current_frame,ictYCbCr2RGB(ycbcr_recovered_frame));
             bitrates(i) = calculateInterErrorBitrate(current_frame,0,[huffman_error_stream ; huffman_mv]);
             ycbcr_reference_frame_1=ycbcr_recovered_frame;
         elseif tags{i} == 'B'
-            %% MOTION ESTIMATION
+            %% B FRAMES MOTION ESTIMATION
             [ycbcr_predicted_frame,motion_matrix]=BidirectionalInterEncodeFrame(macroblock_dim,mv_search_range,ycbcr_reference_frame_1,ycbcr_current_frame,ycbcr_reference_frame_0);
 
             %% ERROR CALCULATION
@@ -189,15 +197,22 @@ function[] = EncodeVideo(Q,GOP_enabled)
             [ycbcr_decoded_error_frame,huffman_error_stream] = IntraEncodeFrame(ycbcr_prediction_error_frame,inter_b_binary_tree_ef,inter_b_bin_code_ef,inter_b_codelengths_ef,4+Q,ef_lowerbound);
 
             %% HUFFMAN CODING OF MV
-            [huffman_mv] = enc_huffman_new(motion_matrix(:,:,1:2)+mv_search_range+1,inter_b_bin_code_mv,inter_b_codelengths_mv);
+                        
+            if DEMV_enabled
+                motion_matrix(:,:,1:2) = EncodeMMDifferentially(motion_matrix(:,:,1:2));
+            end
+            [huffman_mv]=enc_huffman_new(motion_matrix(:,:,1:2)+DEMV_coeff*mv_search_range+1,inter_b_bin_code_mv,inter_b_codelengths_mv);
             mm_length = motion_matrix(:,:,1:2);
             mm_length = length(mm_length(:));
             %% DECODING
-            decoded_mv = dec_huffman_new(huffman_mv,inter_b_binary_tree_mv,mm_length) - 4 - 1;
+            decoded_mv = dec_huffman_new(huffman_mv,inter_b_binary_tree_mv,mm_length) - DEMV_coeff*mv_search_range - 1;
             new_decoded_image_mv_00 = decoded_mv(1:36*44);
             new_decoded_image_mv_01 = decoded_mv(36*44+1:2*36*44);
             reshaped_mv(:,:,1) = reshape (new_decoded_image_mv_00,36,44);
             reshaped_mv(:,:,2) = reshape (new_decoded_image_mv_01,36,44);
+            if DEMV_enabled
+                reshaped_mv(:,:,1:2) = DecodeMMDifferentially(reshaped_mv(:,:,1:2));
+            end
             reshaped_mv(:,:,3) = motion_matrix(:,:,3);
 
             %% MOTION COMPENSATION

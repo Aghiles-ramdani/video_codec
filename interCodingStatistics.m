@@ -23,12 +23,16 @@
 %
 %--------------------------------------------------------------------------
 
-function [intra_mv_histogram , intra_mv_histogram_sum, intra_ef_histogram,intra_ef_histogram_sum] =  interCodingStatistics(macroblock_dim,Q,mv_search_range,frame_01,frame_00)
+function [intra_mv_histogram , intra_mv_histogram_sum, intra_ef_histogram,intra_ef_histogram_sum] =  interCodingStatistics(macroblock_dim,Q,mv_search_range,frame_01,frame_00,MVDE_enabled)
     ef_lowerbound = -255;
     ef_upperbound = 260;
     [ycbcr_predicted_frame,motion_matrix]=InterEncodeFrame(macroblock_dim,mv_search_range,frame_01,frame_00);
     ycbcr_prediction_error_frame = frame_01 - ycbcr_predicted_frame;
     ycbcr_intra_encoded_error_frame = preEncodeIntraProcess(ycbcr_prediction_error_frame,Q);
+    if MVDE_enabled
+        mv_search_range = 2*mv_search_range;
+        motion_matrix=EncodeMMDifferentially(motion_matrix);
+    end
     intra_mv_histogram = hist(motion_matrix(:),-mv_search_range:mv_search_range);
     intra_mv_histogram_sum = sum(sum(intra_mv_histogram));
     intra_ef_histogram = hist(ycbcr_intra_encoded_error_frame,ef_lowerbound:ef_upperbound);

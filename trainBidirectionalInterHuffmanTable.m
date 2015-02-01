@@ -12,6 +12,7 @@ mv_search_range = 4;
 gop = ['I' 'P' 'B' 'B' 'P' 'B' 'B' 'P' 'B' 'B' 'P'];
 intra_b_mv_histogram = 0;
 intra_b_ef_histogram = 0;
+intra_b_demv_histogram = 0;
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,31 +69,31 @@ clear b_frames
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% LOAD HUFFMAN TABLES %%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00',46,Q);
+bt_path = addQ2Path('video_codec/huffman_tables/intra_binary_tree_00',46,Q,false);
 intra_binary_tree = load(bt_path,'-mat');
 intra_binary_tree = intra_binary_tree.intra_binary_tree;
-bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00',43,Q);
+bc_path = addQ2Path('video_codec/huffman_tables/intra_bin_code_00',43,Q,false);
 intra_bin_code = load(bc_path,'-mat');
 intra_bin_code = intra_bin_code.intra_bin_code;
-cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00',46,Q);
+cl_path = addQ2Path('video_codec/huffman_tables/intra_codelengths_00',46,Q,false);
 intra_codelengths = load(cl_path,'-mat');
 intra_codelengths = intra_codelengths.intra_codelengths;
-bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_ef_00',49,Q);
+bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_ef_00',49,Q,false);
 inter_binary_tree_ef = load(bt_path,'-mat');
 inter_binary_tree_ef = inter_binary_tree_ef.inter_binary_tree_ef;
-bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_ef_00',46,Q);
+bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_ef_00',46,Q,false);
 inter_bin_code_ef = load(bc_path,'-mat');
 inter_bin_code_ef = inter_bin_code_ef.inter_bin_code_ef;
-cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_ef_00',49,Q);
+cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_ef_00',49,Q,false);
 inter_codelengths_ef = load(cl_path,'-mat');
 inter_codelengths_ef = inter_codelengths_ef.inter_codelengths_ef;
-bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_mv_00',49,Q);
+bt_path = addQ2Path('video_codec/huffman_tables/inter_binary_tree_mv_00',49,Q,false);
 inter_binary_tree_mv = load(bt_path,'-mat');
 inter_binary_tree_mv = inter_binary_tree_mv.inter_binary_tree_mv;
-bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_mv_00',46,Q);
+bc_path = addQ2Path('video_codec/huffman_tables/inter_bin_code_mv_00',46,Q,false);
 inter_bin_code_mv = load(bc_path,'-mat');
 inter_bin_code_mv = inter_bin_code_mv.inter_bin_code_mv;
-cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_mv_00',49,Q);
+cl_path = addQ2Path('video_codec/huffman_tables/inter_codelengths_mv_00',49,Q,false);
 inter_codelengths_mv = load(cl_path,'-mat');
 inter_codelengths_mv = inter_codelengths_mv.inter_codelengths_mv;
 
@@ -142,7 +143,9 @@ for i = 1:11
         ycbcr_prediction_error_frame=ycbcr_current_frame-ycbcr_predicted_frame;
         ycbcr_prediction_error_frame = preEncodeIntraProcess(ycbcr_prediction_error_frame,Q+4);
         motion_matrix = motion_matrix(:,:,1:2);
+        de_motion_matrix = EncodeMMDifferentially(motion_matrix(:,:,1:2));
         intra_b_mv_histogram = intra_b_mv_histogram + hist(motion_matrix(:),-mv_search_range:mv_search_range);
+        intra_b_demv_histogram = intra_b_demv_histogram + hist(de_motion_matrix(:),-2*mv_search_range:2*mv_search_range);
         intra_b_ef_histogram = intra_b_ef_histogram + hist(ycbcr_prediction_error_frame(:),ef_lowerbound:ef_upperbound);
         
     end
@@ -157,22 +160,33 @@ inter_processing_duration = cputime - start;
 intra_mv_histogram_sum = sum(sum(intra_b_mv_histogram));
 intra_b_mv_histogram = intra_b_mv_histogram / intra_mv_histogram_sum;
 [inter_b_binary_tree_mv, inter_b_huff_code_mv, inter_b_bin_code_mv, inter_b_codelengths_mv] = buildHuffman(intra_b_mv_histogram);
-bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_mv_00.mat',51,Q);
+bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_mv_00.mat',51,Q,false);
 save(bt_path, 'inter_b_binary_tree_mv');
-hc_path = addQ2Path('video_codec/huffman_tables/inter_b_huff_code_mv_00.mat',49,Q);
+hc_path = addQ2Path('video_codec/huffman_tables/inter_b_huff_code_mv_00.mat',49,Q,false);
 save(hc_path, 'inter_b_huff_code_mv');
-bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_mv_00.mat',48,Q);
+bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_mv_00.mat',48,Q,false);
 save(bc_path, 'inter_b_bin_code_mv');
-cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_mv_00.mat',51,Q);
+cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_mv_00.mat',51,Q,false);
 save(cl_path, 'inter_b_codelengths_mv');
 intra_ef_histogram_sum = sum(sum(intra_b_ef_histogram));
 intra_b_ef_histogram = intra_b_ef_histogram / intra_ef_histogram_sum;
 [inter_b_binary_tree_ef, inter_b_huff_code_ef, inter_b_bin_code_ef, inter_b_codelengths_ef] = buildHuffman(intra_b_ef_histogram);
-bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_ef_00.mat',51,Q);
+bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_ef_00.mat',51,Q,false);
 save(bt_path, 'inter_b_binary_tree_ef');
-hc_path = addQ2Path('video_codec/huffman_tables/inter_b_huff_code_ef_00.mat',49,Q);
+hc_path = addQ2Path('video_codec/huffman_tables/inter_b_huff_code_ef_00.mat',49,Q,false);
 save(hc_path, 'inter_b_huff_code_ef');
-bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_ef_00.mat',48,Q);
+bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_ef_00.mat',48,Q,false);
 save(bc_path, 'inter_b_bin_code_ef');
-cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_ef_00.mat',51,Q);
+cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_ef_00.mat',51,Q,false);
 save(cl_path, 'inter_b_codelengths_ef');
+intra_demv_histogram_sum = sum(sum(intra_b_demv_histogram));
+intra_b_demv_histogram = intra_b_demv_histogram / intra_demv_histogram_sum;
+[inter_b_binary_tree_mv, inter_b_huff_code_mv, inter_b_bin_code_mv, inter_b_codelengths_mv] = buildHuffman(intra_b_demv_histogram);
+bt_path = addQ2Path('video_codec/huffman_tables/inter_b_binary_tree_mv_00.mat',51,Q,true);
+save(bt_path, 'inter_b_binary_tree_mv');
+hc_path = addQ2Path('video_codec/huffman_tables/inter_b_huff_code_mv_00.mat',49,Q,true);
+save(hc_path, 'inter_b_huff_code_mv');
+bc_path = addQ2Path('video_codec/huffman_tables/inter_b_bin_code_mv_00.mat',48,Q,true);
+save(bc_path, 'inter_b_bin_code_mv');
+cl_path = addQ2Path('video_codec/huffman_tables/inter_b_codelengths_mv_00.mat',51,Q,true);
+save(cl_path, 'inter_b_codelengths_mv');

@@ -4,7 +4,7 @@ function[differentially_coded_mm] = EncodeMMDifferentially(motion_matrix)
     for i = 1:dimensions(1)
         for j = 1:dimensions(2)
             current_mv = motion_matrix(i,j,:);
-                if i == 1 & j == 1
+                if i == 1 && j == 1
                     differentially_coded_mm(i,j,:) = current_mv;
                 else
                     differentially_coded_mm(i,j,:) = current_mv - old_mv;
